@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
 export default function App() {
   const grid_layout = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -18,17 +18,22 @@ export default function App() {
                 const isThickBottom = row === 2 || row === 5;
                 const isThickRight = col === 2 || col === 5;
                 
+                // This is specific loop index currently selected in memory
+                const isSelected = selectedCell?.row === row && selectedCell?.col === col;
+
                 return (
-                    <View 
+                    <TouchableOpacity 
                         key={col} 
                         style={[
                             styles.cell,
                             isThickBottom && styles.thickBottom,
                             isThickRight && styles.thickRight,
+                            isSelected && styles.selectedCellBg,
                         ]}
+                        onPress={() => setSelectedCell({ row, col })}
                     >
                         <Text style={styles.cellText}>5</Text>
-                    </View>  
+                    </TouchableOpacity>  
                 );
             })}
         </View>
@@ -73,5 +78,8 @@ const styles = StyleSheet.create({
   thickRight: {
     borderRightWidth: 2,
     borderRightColor: '#000',
+  },
+  selectedCellBg: {
+    backgroundColor: '#e0f2fe',
   },
 });
