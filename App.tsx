@@ -35,8 +35,11 @@ export default function App() {
                         const isThickRight = col === 2 || col === 5;
                         // This is specific loop index currently selected in memory
                         const isSelected = selectedCell?.row === row && selectedCell?.col === col;
-                        //  Grab the real value out of your board data matrix
+                        // Grab the real value out of your board data matrix
                         const cellValue = board[row][col]
+
+                        // Check if this cell is part of the original puzzle setup
+                        const isInitial = INITIAL_SUDOKU_BOARD[row][col] != 0;
                 
                         return (
                             <TouchableOpacity 
@@ -47,9 +50,17 @@ export default function App() {
                                     isThickRight && styles.thickRight,
                                     isSelected && styles.selectedCellBg,
                                 ]}
-                                onPress={() => setSelectedCell({ row, col })}
+                                onPress={() => {
+                                    // Check if this cell started as a number, then lock it
+                                    if (isInitial) return;
+
+                                    // Otherwise, it's an editable cell, so select it!
+                                    setSelectedCell({ row, col })}}
                             >
-                                <Text style={styles.cellText}>
+                                <Text style={[
+                                    styles.cellText,
+                                    isInitial ? styles.initialText: styles.userText
+                                ]}>
                                     {cellValue === 0 ? "" : cellValue}
                                 </Text>
                             </TouchableOpacity>  
@@ -139,5 +150,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
-  }
+  },
+  initialText: {
+    color: '#000000',
+    fontWeight: '900',
+  },
+  userText: {
+    color: '#2563eb',
+    fontWeight: '500',
+  },
 });
