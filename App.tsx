@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { INITIAL_SUDOKU_BOARD } from './startingBoards';
 
 export default function App() {
   const grid_layout = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
   // our memory slot. It will track { row: X, col: Y}
+  const [board, setBoard] = useState(INITIAL_SUDOKU_BOARD)
   const [selectedCell, setSelectedCell] = useState<{row:number, col:number} | null>(null)
 
   return (
@@ -21,6 +23,9 @@ export default function App() {
                 // This is specific loop index currently selected in memory
                 const isSelected = selectedCell?.row === row && selectedCell?.col === col;
 
+                //  Grab the real value out of your board data matrix
+                const cellValue = board[row][col]
+
                 return (
                     <TouchableOpacity 
                         key={col} 
@@ -32,7 +37,9 @@ export default function App() {
                         ]}
                         onPress={() => setSelectedCell({ row, col })}
                     >
-                        <Text style={styles.cellText}>5</Text>
+                        <Text style={styles.cellText}>
+                            {cellValue === 0 ? "" : cellValue}
+                        </Text>
                     </TouchableOpacity>  
                 );
             })}
