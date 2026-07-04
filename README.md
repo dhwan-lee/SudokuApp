@@ -12,6 +12,9 @@ A modern, interactive $9 \times 9$ Sudoku puzzle game built from scratch using R
 - **Milestone 3:** Separated static puzzle data into an independent matrix module (`startingBoards.ts`) and engineered a dynamic 2D array grid-rendering loop.
 - **Milestone 4:** Developed a fully interactive on-screen custom circular Number Pad controller with immutable state clone handling.
 - **Milestone 5:** Enforced strict game rules by rendering original numbers as read-only, distinct bold black assets, while isolating user-inputted numbers into a distinct player-blue color scheme.
+- **Milestone 6:** Integrated a dedicated custom cell erasing controller (`⌫`) targeting unmapped entries.
+- **Milestone 7:** Abstracted complex game logic into a modular algorithmic utility library (`sudokuUtils.ts`) featuring real-time row, column, and $3 \times 3$ sub-grid conflict tracking.
+- **Milestone 8:** Engineered an automated, cross-platform win detector using React Native's `Platform` manager to handle native mobile notifications and web browser alerts seamlessly.
 ---
 
 ## 🛠️ Tech Stack
