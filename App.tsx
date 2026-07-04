@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { INITIAL_SUDOKU_BOARD } from './startingBoards';
+import { checkIsInvalid } from './sudokuUtils';
 
 export default function App() {
   const grid_layout = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -40,6 +41,8 @@ export default function App() {
 
                         // Check if this cell is part of the original puzzle setup
                         const isInitial = INITIAL_SUDOKU_BOARD[row][col] != 0;
+
+                        const isInvalid = checkIsInvalid(row, col, cellValue, board);
                 
                         return (
                             <TouchableOpacity 
@@ -59,7 +62,8 @@ export default function App() {
                             >
                                 <Text style={[
                                     styles.cellText,
-                                    isInitial ? styles.initialText: styles.userText
+                                    isInitial ? styles.initialText: styles.userText,
+                                    isInvalid ? styles.errorText: null,
                                 ]}>
                                     {cellValue === 0 ? "" : cellValue}
                                 </Text>
@@ -88,7 +92,6 @@ export default function App() {
                 <Text style={styles.numButtonText}>⌫</Text>
             </TouchableOpacity>
         </View>
-
         <StatusBar style="auto" />
     </View>
   );
@@ -168,5 +171,9 @@ const styles = StyleSheet.create({
   },
   eraserButton: {
     backgroundColor: '#ef4444',
-  }
+  },
+  errorText: {
+    color: '#ef4444', 
+    fontWeight: 'bold',
+  },
 });
