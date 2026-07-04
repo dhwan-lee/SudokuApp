@@ -80,6 +80,13 @@ export default function App() {
                     <Text style={styles.numButtonText}>{num}</Text>
                 </TouchableOpacity>
             ))}
+
+            <TouchableOpacity
+                style={[styles.numButton, styles.eraserButton]}
+                onPress={() => handleNumberPress(0)}
+            >
+                <Text style={styles.numButtonText}>⌫</Text>
+            </TouchableOpacity>
         </View>
 
         <StatusBar style="auto" />
@@ -159,4 +166,7 @@ const styles = StyleSheet.create({
     color: '#2563eb',
     fontWeight: '500',
   },
+  eraserButton: {
+    backgroundColor: '#ef4444',
+  }
 });
