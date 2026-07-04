@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform } from 'react-native';
 import { INITIAL_SUDOKU_BOARD } from './startingBoards';
-import { checkIsInvalid } from './sudokuUtils';
+import { checkIsInvalid, checkWinCondition } from './sudokuUtils';
 
 export default function App() {
   const grid_layout = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -23,6 +23,21 @@ export default function App() {
     newBoard[row][col] = num;
     // Save the updated board back into our live state
     setBoard(newBoard);
+
+    // Check if this final move solved puzzle
+    if (checkWinCondition(newBoard)) {
+      if (Platform.OS === 'web') {
+        // Web browser fallback layout
+        alert("🎉 Congratulations! You have successfully solved the Sudoku puzzle perfectly!");
+      } else {
+        // Native mobile popup layout
+        Alert.alert(
+          "🎉 Congratulations!",
+          "You have successfully solved the Sudoku puzzle perfectly!",
+          [{ text: "Awesome!" }]
+        );
+      }
+    }
   };
 
   return (
