@@ -107,6 +107,18 @@ export default function App() {
                 <Text style={styles.numButtonText}>⌫</Text>
             </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+            style={styles.resetButton}
+            onPress={() => {
+                // Wipe the board state back to the original blueprint copy
+                setBoard(INITIAL_SUDOKU_BOARD.map(r => [...r]));
+                // Clear any active blue cell selection highlights
+                setSelectedCell(null);
+            }}
+        >
+            <Text style={styles.resetButtonText}>🔄 Reset Board</Text>
+        </TouchableOpacity>
         <StatusBar style="auto" />
     </View>
   );
@@ -190,5 +202,23 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#ef4444', 
     fontWeight: 'bold',
+  },
+  resetButton: {
+    marginTop: 25,
+    backgroundColor: '#1e293b', // Sleek slate gray/black
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  resetButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
 });
