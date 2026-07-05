@@ -55,22 +55,24 @@ export default function App() {
     // Save the updated board back into our live state
     setBoard(newBoard);
 
-    // Check if this final move solved puzzle
-    if (checkWinCondition(newBoard)) {
-      if (Platform.OS === 'web') {
-        // Web browser fallback layout
-        alert("🎉 Congratulations! You have successfully solved the Sudoku puzzle perfectly!");
-      } else {
-        // Native mobile popup layout
-        Alert.alert(
-          "🎉 Congratulations!",
-          "You have successfully solved the Sudoku puzzle perfectly!",
-          [{ text: "Awesome!" }]
-        );
-      }
-    }
-  };
-
+    setTimeout(() => {
+        // Check if this final move solved puzzle
+        if (checkWinCondition(newBoard)) {
+            if (Platform.OS === 'web') {
+                // Web browser fallback layout
+                alert("🎉 Congratulations! You have successfully solved the Sudoku puzzle perfectly!");
+            } else {
+                // Native mobile popup layout
+                Alert.alert(
+                    "🎉 Congratulations!",
+                    "You have successfully solved the Sudoku puzzle perfectly!",
+                    [{ text: "Awesome!" }]
+                );
+            }
+        }
+    }, 50);
+  }
+    
   return (
     <View style={styles.container}>
         <View style={styles.headerContainer}>
