@@ -15,15 +15,19 @@ A modern, interactive $9 \times 9$ Sudoku puzzle game built from scratch using R
 - **Milestone 6:** Integrated a dedicated custom cell erasing controller (`⌫`) targeting unmapped entries.
 - **Milestone 7:** Abstracted complex game logic into a modular algorithmic utility library (`sudokuUtils.ts`) featuring real-time row, column, and $3 \times 3$ sub-grid conflict tracking.
 - **Milestone 8:** Engineered an automated, cross-platform win detector using React Native's `Platform` manager to handle native mobile notifications and web browser alerts seamlessly.
+- **Milestone 9 (Unified State Reset):** Integrated a clean "Reset Board" layout option that flushes current user grids, resets highlighting maps, and re-initializes memory matrices perfectly.
+- **Milestone 10 (Premium UX & Performance Optimization):** 
+  - *Identical Digit Focus:* Softly illuminates every identical value on the grid when a cell is selected, facilitating fast-scanning UX.
+  - *Performance Tracker:* Implemented an optimized background interval tick loop via `useEffect` with built-in character padding (`MM:SS`) to prevent character width layout shifting.
+  - *Multi-Tier Level Profiles:* Structured dynamic state machines allowing users to toggle on-demand between Easy, Medium, and Hard layout pools seamlessly.
 ---
 
 ## 🛠️ Tech Stack
 
-* **Framework:** React Native (Expo Workflow)
-* **Language:** TypeScript
-* **State Management:** React Hooks (`useState`)
-* **Styling:** React Native `StyleSheet` (Flexbox Engine)
-
+- **Framework:** React Native (Expo Workflow)
+- **Language:** TypeScript (Strictly typed array matrices & hooks)
+- **Styling:** StyleSheet (Flexbox, Conditional Element Overlays)
+- **Logic:** Decoupled functional utility algorithms
 ---
 
 ## 💻 How To Run the Project Locally
