@@ -1,19 +1,28 @@
 import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform } from 'react-native';
-import { INITIAL_SUDOKU_BOARD } from './startingBoards';
+import { SUDOKU_POOLS } from './startingBoards';
 import { checkIsInvalid, checkWinCondition } from './sudokuUtils';
 
 export default function App() {
   const grid_layout = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
   // our memory slot. It will track { row: X, col: Y}
-  const [board, setBoard] = useState(INITIAL_SUDOKU_BOARD)
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
+  const [initialBoard, setInitialBoard] = useState(SUDOKU_POOLS.easy);
+  const [board, setBoard] = useState(SUDOKU_POOLS.easy.map(r => [...r]));
   const [selectedCell, setSelectedCell] = useState<{row:number, col:number} | null>(null)
 
   // Track elapsed seconds
   const [seconds, setSeconds] = useState(0);
-
+  const loadNewDifficulty = (level: 'easy' | 'medium' | 'hard') => {
+    const selectedPool = SUDOKU_POOLS[level];
+    setDifficulty(level);
+    setInitialBoard(selectedPool);
+    setBoard(selectedPool.map(r => [...r]));
+    setSelectedCell(null);
+    setSeconds(0);
+  };
   // Set up the background clock tick interval loop
   useEffect(() => {
     const interval = setInterval(() => {
@@ -67,6 +76,25 @@ export default function App() {
         <View style={styles.headerContainer}>
             <Text style={styles.timerText}>⏱️ Time: {formatTime(seconds)}</Text>
         </View>
+        <View style={styles.difficultyContainer}>
+            {(['easy', 'medium', 'hard'] as const).map((level) => (
+                <TouchableOpacity
+                    key={level}
+                    style={[
+                        styles.diffButton,
+                        difficulty === level && styles.activeDiffButton
+                    ]}
+                    onPress={() => loadNewDifficulty(level)}
+                >
+                    <Text style={[
+                        styles.diffButtonText,
+                        difficulty === level && styles.activeDiffButtonText
+                    ]}>
+                        {level.toUpperCase()}
+                    </Text>
+                </TouchableOpacity>
+            ))}
+        </View>
         <View style={styles.board}>
             {grid_layout.map((row) => (
                 <View key={row} style={styles.row}>
@@ -80,7 +108,7 @@ export default function App() {
                         const cellValue = board[row][col]
 
                         // Check if this cell is part of the original puzzle setup
-                        const isInitial = INITIAL_SUDOKU_BOARD[row][col] != 0;
+                        const isInitial = initialBoard[row][col] != 0;
                         const isInvalid = checkIsInvalid(row, col, cellValue, board);
 
                         // Get the value of the currently highlighted cell (if any)
@@ -141,14 +169,7 @@ export default function App() {
 
         <TouchableOpacity
             style={styles.resetButton}
-            onPress={() => {
-                // Wipe the board state back to the original blueprint copy
-                setBoard(INITIAL_SUDOKU_BOARD.map(r => [...r]));
-                // Clear any active blue cell selection highlights
-                setSelectedCell(null);
-                // Reset clock to 0
-                setSeconds(0);
-            }}
+            onPress={() => loadNewDifficulty(difficulty)}
         >
             <Text style={styles.resetButtonText}>🔄 Reset Board</Text>
         </TouchableOpacity>
@@ -266,5 +287,28 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#334155', // Slate color
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', // Uniform character width sizing
+  },
+  difficultyContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
+    padding: 4,
+  },
+  diffButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+  activeDiffButton: {
+    backgroundColor: '#3b82f6',
+  },
+  diffButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748b',
+  },
+  activeDiffButtonText: {
+    color: '#fff',
   },
 });
