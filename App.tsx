@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform } from 'react-native';
 import { INITIAL_SUDOKU_BOARD } from './startingBoards';
@@ -10,6 +10,28 @@ export default function App() {
   // our memory slot. It will track { row: X, col: Y}
   const [board, setBoard] = useState(INITIAL_SUDOKU_BOARD)
   const [selectedCell, setSelectedCell] = useState<{row:number, col:number} | null>(null)
+
+  // Track elapsed seconds
+  const [seconds, setSeconds] = useState(0);
+
+  // Set up the background clock tick interval loop
+  useEffect(() => {
+    const interval = setInterval(() => {
+        setSeconds(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Helper function to convert raw seconds to "MM:SS" layout string
+  const formatTime = (totalSeconds: number): string => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+
+    const pad = (num: number) => num < 10 ? `0${num}` : num;
+    return `${pad(minutes)}:${pad(remainingSeconds)}`;
+  };
+
   const handleNumberPress = (num: number) => {
     // If no cell is selected, do absolutely nothing
     if (!selectedCell) return;
@@ -42,6 +64,9 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+        <View style={styles.headerContainer}>
+            <Text style={styles.timerText}>⏱️ Time: {formatTime(seconds)}</Text>
+        </View>
         <View style={styles.board}>
             {grid_layout.map((row) => (
                 <View key={row} style={styles.row}>
@@ -56,8 +81,13 @@ export default function App() {
 
                         // Check if this cell is part of the original puzzle setup
                         const isInitial = INITIAL_SUDOKU_BOARD[row][col] != 0;
-
                         const isInvalid = checkIsInvalid(row, col, cellValue, board);
+
+                        // Get the value of the currently highlighted cell (if any)
+                        const selectedCellValue = selectedCell ? board[selectedCell.row][selectedCell.col] : 0;
+
+                        // Highlight this cell if its number matches the selected cell's number
+                        const isMatchingNumber = selectedCellValue !== 0 && cellValue === selectedCellValue && !isSelected;
                 
                         return (
                             <TouchableOpacity 
@@ -67,6 +97,7 @@ export default function App() {
                                     isThickBottom && styles.thickBottom,
                                     isThickRight && styles.thickRight,
                                     isSelected && styles.selectedCellBg,
+                                    isMatchingNumber && styles.matchingNumberBg,
                                 ]}
                                 onPress={() => {
                                     // Check if this cell started as a number, then lock it
@@ -115,6 +146,8 @@ export default function App() {
                 setBoard(INITIAL_SUDOKU_BOARD.map(r => [...r]));
                 // Clear any active blue cell selection highlights
                 setSelectedCell(null);
+                // Reset clock to 0
+                setSeconds(0);
             }}
         >
             <Text style={styles.resetButtonText}>🔄 Reset Board</Text>
@@ -220,5 +253,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 0.5,
+  },
+  matchingNumberBg: {
+    backgroundColor: '#f0fdf4', // A soft, clean mint green or light slate blue tint
+  },
+  headerContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  timerText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#334155', // Slate color
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', // Uniform character width sizing
   },
 });
