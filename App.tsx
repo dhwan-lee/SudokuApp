@@ -15,6 +15,15 @@ export default function App() {
 
   // Track elapsed seconds
   const [seconds, setSeconds] = useState(0);
+  // Track the user's mistake count
+  const [mistakes, setMistakes] = useState(0);
+  // Helper function to determine the max allowed strikes dynamically
+  const getMaxMistakes = (level: 'easy' | 'medium' | 'hard'): number => {
+    if (level === 'easy') return 10;
+    if (level === 'medium') return 5;
+    return 3;
+  };
+
   const loadNewDifficulty = (level: 'easy' | 'medium' | 'hard') => {
     const selectedPool = SUDOKU_POOLS[level];
     setDifficulty(level);
@@ -22,6 +31,7 @@ export default function App() {
     setBoard(selectedPool.map(r => [...r]));
     setSelectedCell(null);
     setSeconds(0);
+    setMistakes(0);
   };
 
   // Set up the background clock tick interval loop
@@ -46,6 +56,9 @@ export default function App() {
     // If no cell is selected, do absolutely nothing
     if (!selectedCell) return;
 
+    // Lock input if they've already hit Game Over limits
+    const maxAllowed = getMaxMistakes(difficulty);
+    if (mistakes >= maxAllowed) return;
     const { row, col } = selectedCell;
     
     // Create the clean array copy first
@@ -55,6 +68,27 @@ export default function App() {
     newBoard[row][col] = num;
     // Save the updated board back into our live state
     setBoard(newBoard);
+
+    // Check if this input move violates Sudoku rules
+    const isInvalidMove = num !== 0 && checkIsInvalid(row, col, num, board);
+
+    if (isInvalidMove) {
+      const updatedMistakes = mistakes + 1;
+      setMistakes(updatedMistakes);
+
+      // Check if they just hit their limit
+      if (updatedMistakes >= maxAllowed) {
+        setTimeout(() => {
+          if (Platform.OS === 'web') {
+            alert("❌ Game Over! You've exceeded the allowed mistakes for this difficulty.");
+          } else {
+            Alert.alert("❌ Game Over", "You've exceeded the allowed mistakes for this difficulty.");
+          }
+          loadNewDifficulty(difficulty); // Force a clean reset
+        }, 100);
+        return;
+      }
+    }
 
     setTimeout(() => {
         // Check if this final move solved puzzle
@@ -99,11 +133,77 @@ export default function App() {
       }
     }
   };
+
+  // Smart Hint Action Trigger
+  const triggerSmartHint = () => {
+    // Figure out which cell needs a hint (use selected cell, fallback to first empty cell)
+    let targetRow: number | undefined = selectedCell?.row;
+    let targetCol: number | undefined = selectedCell?.col;
+
+    if (targetRow === undefined || targetCol === undefined) {
+      // Fallback: Scan the board to find the first empty slot
+      let foundEmpty = false;
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          if (board[r][c] === 0) {
+            targetRow = r;
+            targetCol = c;
+            foundEmpty = true;
+            break;
+          }
+        }
+        if (foundEmpty) break;
+      }
+
+      // If no empty cell exists, the board is full!
+      if (!foundEmpty) {
+        if (Platform.OS === 'web') alert("🎉 The board is already fully solved!");
+        return;
+      }
+    }
+
+    // Double check that we aren't trying to overwrite an initial puzzle cell
+    if (initialBoard[targetRow!][targetCol!] !== 0) {
+      if (Platform.OS === 'web') alert("💡 That cell is a starting puzzle number!");
+      return;
+    }
+
+    // Clone the board and run our backtracking solver behind the scenes to find the solution matrix
+    const solverBoardCopy = board.map(r => [...r]);
+    
+    if (solveSudokuMatrix(solverBoardCopy)) {
+      // 📍 FIX: Use the non-null assertion operator (!) to guarantee TypeScript these are numbers
+      const finalRow = targetRow!;
+      const finalCol = targetCol!;
+      
+      const correctNumber = solverBoardCopy[finalRow][finalCol];
+      
+      // Safely update just that single target cell on the live board layout
+      const updatedBoard = board.map(r => [...r]);
+      updatedBoard[finalRow][finalCol] = correctNumber;
+      setBoard(updatedBoard);
+      
+      // Keep it selected so they can see what changed!
+      setSelectedCell({ row: finalRow, col: finalCol });
+    } else {
+      if (Platform.OS === 'web') {
+        alert("❌ Your current board has conflicts. Clear your mistakes before asking for a hint!");
+      } else {
+        Alert.alert("❌ Hint Error", "Your current board has conflicts. Clear your mistakes before asking for a hint!");
+      }
+    }
+  };
     
   return (
     <View style={styles.container}>
         <View style={styles.headerContainer}>
             <Text style={styles.timerText}>⏱️ Time: {formatTime(seconds)}</Text>
+            <Text style={[
+                styles.mistakeText,
+                mistakes > 0 && mistakes >= getMaxMistakes(difficulty) - 1 ? styles.criticalMistakeText : null
+            ]}>
+                ⚠️ Mistakes: {mistakes} / {getMaxMistakes(difficulty)}
+            </Text>
         </View>
         <View style={styles.difficultyContainer}>
             {(['easy', 'medium', 'hard'] as const).map((level) => (
@@ -202,6 +302,14 @@ export default function App() {
         >
             <Text style={styles.resetButtonText}>🔄 Reset Board</Text>
         </TouchableOpacity>
+        
+        <TouchableOpacity
+                style={styles.hintButton}
+                onPress={triggerSmartHint}
+            >
+                <Text style={styles.hintButtonText}>💡 Get Hint</Text>
+        </TouchableOpacity>
+        
         <TouchableOpacity
                 style={styles.solveButton}
                 onPress={triggerAutoSolver}
@@ -366,6 +474,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   solveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  mistakeText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#64748b',
+    marginTop: 4,
+  },
+  criticalMistakeText: {
+    color: '#ef4444', // Turn font bright red when 1 strike away from failure!
+  },
+  hintButton: {
+    backgroundColor: '#d97706', // Clean amber/orange premium color
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hintButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
