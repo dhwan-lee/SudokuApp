@@ -350,26 +350,28 @@ export default function App() {
             </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-            style={styles.resetButton}
-            onPress={() => loadNewDifficulty(difficulty)}
-        >
-            <Text style={styles.resetButtonText}>🔄 Reset Board</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
+        <View style={styles.buttonActionRow}>
+            <TouchableOpacity
+                style={styles.resetButton}
+                onPress={() => loadNewDifficulty(difficulty)}
+            >
+                <Text style={styles.resetButtonText}>🔄 Reset Board</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
                 style={styles.hintButton}
                 onPress={triggerSmartHint}
             >
                 <Text style={styles.hintButtonText}>💡 Get Hint</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
+            </TouchableOpacity>
+
+            <TouchableOpacity
                 style={styles.solveButton}
                 onPress={triggerAutoSolver}
             >
                 <Text style={styles.solveButtonText}>🤖 AI Auto-Solve</Text>
             </TouchableOpacity>
+        </View>
         <StatusBar style="auto" />
     </View>
   );
@@ -454,24 +456,6 @@ const styles = StyleSheet.create({
     color: '#ef4444', 
     fontWeight: 'bold',
   },
-  resetButton: {
-    marginTop: 25,
-    backgroundColor: '#1e293b', // Sleek slate gray/black
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  resetButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
-  },
   matchingNumberBg: {
     backgroundColor: '#f0fdf4', // A soft, clean mint green or light slate blue tint
   },
@@ -511,55 +495,64 @@ const styles = StyleSheet.create({
   buttonActionRow: {
     flexDirection: 'row',
     marginTop: 25,
-    gap: 15, // Creates a clean margin separation between buttons
+    gap: 12,                  // Clean, equal spacing between buttons
+    width: 400,               // Matches the exact total width of your 9x9 board!
+    justifyContent: 'space-between',
   },
-  // Reset style can remain untouched, just alter its marginTop to 0 inside your code if it's inside the row!
-  solveButton: {
-    backgroundColor: '#6366f1', // Indigo modern AI accent profile
-    paddingVertical: 12,
-    paddingHorizontal: 25,
+  resetButton: {
+    flex: 1,                  // Forces equal width allocation
+    height: 44,               // Perfect, uniform touch target height
+    backgroundColor: '#1e293b', 
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  solveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
-  },
-  mistakeText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#64748b',
-    marginTop: 4,
-  },
-  criticalMistakeText: {
-    color: '#ef4444', // Turn font bright red when 1 strike away from failure!
   },
   hintButton: {
-    backgroundColor: '#d97706', // Clean amber/orange premium color
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    flex: 1,                  // Forces equal width allocation
+    height: 44,               // Matches height perfectly
+    backgroundColor: '#d97706', 
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 4,
+  },
+  solveButton: {
+    flex: 1,                  // Forces equal width allocation
+    height: 44,               // Matches height perfectly
+    backgroundColor: '#6366f1', 
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  // Ensure the text styles are perfectly centered and uniform
+  resetButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   hintButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
-    letterSpacing: 0.5,
+  },
+  solveButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   bestTimeText: {
     fontSize: 14,
