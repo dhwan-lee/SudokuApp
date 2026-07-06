@@ -20,6 +20,7 @@ A modern, interactive $9 \times 9$ Sudoku puzzle game built from scratch using R
   - *Identical Digit Focus:* Softly illuminates every identical value on the grid when a cell is selected, facilitating fast-scanning UX.
   - *Performance Tracker:* Implemented an optimized background interval tick loop via `useEffect` with built-in character padding (`MM:SS`) to prevent character width layout shifting.
   - *Multi-Tier Level Profiles:* Structured dynamic state machines allowing users to toggle on-demand between Easy, Medium, and Hard layout pools seamlessly.
+**Milestone 11 (Recursive Backtracking AI Engine):** Engineered an automated constraint-satisfaction solver module using a Depth-First Search (DFS) recursive backtracking algorithm. The processor evaluates board logic states, manages algorithmic call-stacks, and solves empty grids instantly while handling unsolvable conflict grids cleanly.
 ---
 
 ## 🛠️ Tech Stack
