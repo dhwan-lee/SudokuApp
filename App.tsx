@@ -469,6 +469,15 @@ const styles = StyleSheet.create({
     color: '#334155', // Slate color
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', // Uniform character width sizing
   },
+  mistakeText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#64748b',
+    marginTop: 4,
+  },
+  criticalMistakeText: {
+    color: '#ef4444',
+  },
   difficultyContainer: {
     flexDirection: 'row',
     marginBottom: 20,
