@@ -20,7 +20,12 @@ A modern, interactive $9 \times 9$ Sudoku puzzle game built from scratch using R
   - *Identical Digit Focus:* Softly illuminates every identical value on the grid when a cell is selected, facilitating fast-scanning UX.
   - *Performance Tracker:* Implemented an optimized background interval tick loop via `useEffect` with built-in character padding (`MM:SS`) to prevent character width layout shifting.
   - *Multi-Tier Level Profiles:* Structured dynamic state machines allowing users to toggle on-demand between Easy, Medium, and Hard layout pools seamlessly.
-**Milestone 11 (Recursive Backtracking AI Engine):** Engineered an automated constraint-satisfaction solver module using a Depth-First Search (DFS) recursive backtracking algorithm. The processor evaluates board logic states, manages algorithmic call-stacks, and solves empty grids instantly while handling unsolvable conflict grids cleanly.
+- **Milestone 11 (Recursive Backtracking AI Engine):** Engineered an automated constraint-satisfaction solver module using a Depth-First Search (DFS) recursive backtracking algorithm. The processor evaluates board logic states, manages algorithmic call-stacks, and solves empty grids instantly while handling unsolvable conflict grids cleanly.
+- **Milestone 12 (Adaptive Core Systems & Storage Integration):** 
+  - *Adaptive Strike System:* Added context-aware game-over barriers tailored dynamically to your chosen difficulty level (Easy: 10 lives, Medium: 5 lives, Hard: 3 lives).
+  - *Smart Hint Generation:* Created an algorithmic lookahead constraint calculation module capable of instantly solving and filling a single targeted cell when a player is stuck.
+  - *Persistent High Scores:* Installed and integrated `@react-native-async-storage/async-storage` to cache, read, and display personal best times safely across app reboots and device restarts.
+- **Milestone 13 (Dynamic Infinite Board Generation):** Developed a complete randomized board synthesizer. It utilizes a Fisher-Yates shuffle algorithm to generate completely unique, valid completed boards, then carves out empty cells dynamically depending on the selected difficulty tier—eliminating the need for static matrix blueprints entirely.
 ---
 
 ## 🛠️ Tech Stack
@@ -29,6 +34,7 @@ A modern, interactive $9 \times 9$ Sudoku puzzle game built from scratch using R
 - **Language:** TypeScript (Strictly typed array matrices & hooks)
 - **Styling:** StyleSheet (Flexbox, Conditional Element Overlays)
 - **Logic:** Decoupled functional utility algorithms
+- **Storage:** AsyncStorage (Local Key-Value Caching System)
 ---
 
 ## 💻 How To Run the Project Locally
