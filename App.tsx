@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform } from 'react-native';
 import { SUDOKU_POOLS } from './startingBoards';
-import { checkIsInvalid, checkWinCondition } from './sudokuUtils';
+import { checkIsInvalid, checkWinCondition, solveSudokuMatrix } from './sudokuUtils';
 
 export default function App() {
   const grid_layout = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -23,6 +23,7 @@ export default function App() {
     setSelectedCell(null);
     setSeconds(0);
   };
+
   // Set up the background clock tick interval loop
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,7 +72,33 @@ export default function App() {
             }
         }
     }, 50);
-  }
+  };
+
+  // AI Solver Action Trigger
+  const triggerAutoSolver = () => {
+    // Clone the current state to avoid direct state manipulation side-effects
+    const solverBoardCopy = board.map(r => [...r]);
+
+    if (solveSudokuMatrix(solverBoardCopy)) {
+      setBoard(solverBoardCopy);
+      setSelectedCell(null); // Clear active selections
+      
+      // Let the UI finish drawing the filled grid before popping the solver notification
+      setTimeout(() => {
+        if (Platform.OS === 'web') {
+          alert("🤖 AI Solver: Puzzle completed successfully using recursive backtracking!");
+        } else {
+          Alert.alert("🤖 AI Solver", "Puzzle completed successfully using recursive backtracking!");
+        }
+      }, 100);
+    } else {
+      if (Platform.OS === 'web') {
+        alert("❌ AI Solver: This puzzle has conflicting inputs and is mathematically unsolvable!");
+      } else {
+        Alert.alert("❌ AI Solver", "This puzzle has conflicting inputs and is mathematically unsolvable!");
+      }
+    }
+  };
     
   return (
     <View style={styles.container}>
@@ -175,6 +202,12 @@ export default function App() {
         >
             <Text style={styles.resetButtonText}>🔄 Reset Board</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+                style={styles.solveButton}
+                onPress={triggerAutoSolver}
+            >
+                <Text style={styles.solveButtonText}>🤖 AI Auto-Solve</Text>
+            </TouchableOpacity>
         <StatusBar style="auto" />
     </View>
   );
@@ -312,5 +345,30 @@ const styles = StyleSheet.create({
   },
   activeDiffButtonText: {
     color: '#fff',
+  },
+  buttonActionRow: {
+    flexDirection: 'row',
+    marginTop: 25,
+    gap: 15, // Creates a clean margin separation between buttons
+  },
+  // Reset style can remain untouched, just alter its marginTop to 0 inside your code if it's inside the row!
+  solveButton: {
+    backgroundColor: '#6366f1', // Indigo modern AI accent profile
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  solveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
 });

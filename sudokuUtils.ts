@@ -52,3 +52,31 @@ export const checkWinCondition = (board: number[][]): boolean => {
     // The board is full and perfect
     return true;
 };
+
+// Backtracking Algorithm Solver Engine
+export const solveSudokuMatrix = (board: number[][]): boolean => {
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            // Find an empty slot
+            if (board[row][col] === 0) {
+                // Try digits 1 through 9
+                for (let num = 1; num <= 9; num++) {
+                    // Temporarily check if placing this number violates any rules
+                    if (!checkIsInvalid(row, col, num, board)) {
+                        board[row][col] = num;
+
+                        // Recursively attempt to solve the rest of the board with this guess
+                        if (solveSudokuMatrix(board)) return true
+
+                        // BACKTRACK: if that guess failed downstream, undo it and try the next digit
+                        board[row][col] = 0;
+                    }
+                }
+                // Triggers backtracking up the recursion chain if no 1-9 works
+                return false;
+            }
+        }
+    }
+    // Every single slot has been successfully filled without conflict
+    return true;
+};
