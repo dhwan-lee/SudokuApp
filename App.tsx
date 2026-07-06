@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform } from 'react-native';
 import { SUDOKU_POOLS } from './startingBoards';
 import { checkIsInvalid, checkWinCondition, solveSudokuMatrix } from './sudokuUtils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
   const grid_layout = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -17,6 +18,52 @@ export default function App() {
   const [seconds, setSeconds] = useState(0);
   // Track the user's mistake count
   const [mistakes, setMistakes] = useState(0);
+  // Track personal best time for each difficulty (0 means no record yet)
+  const [bestTimes, setBestTimes] = useState<{ easy: number; medium: number; hard: number }>({
+    easy: 0,
+    medium: 0,
+    hard: 0,
+  });
+  // Load saved high scores from the device storage on boot
+  const loadSavedBestTimes = async() => {
+    try {
+        const savedData = await AsyncStorage.getItem('SUDOKU_BEST_TIMES');
+        if (savedData) {
+            setBestTimes(JSON.parse(savedData));
+        }
+    } catch (error) {
+        console.log('Error loading high scores:', error);
+    }
+  };
+
+  // Run this once when the application boot up
+  useEffect(() => {
+    loadSavedBestTimes();
+  }, []);
+
+  // Helper function to check and save a new high score record
+  const checkAndSaveHighScore = async (finalTime: number) => {
+    const currentRecord = bestTimes[difficulty];
+
+    // If there's no record yet, or the new time is faster (less seconds)
+    if (currentRecord === 0 || finalTime < currentRecord) {
+        const updatedRecords = {
+            ...bestTimes,
+            [difficulty]: finalTime,
+        };
+      
+        setBestTimes(updatedRecords);
+        try {
+            await AsyncStorage.setItem('SUDOKU_BEST_TIMES', JSON.stringify(updatedRecords));
+            if (Platform.OS === 'web') {
+            alert(`🏆 New Personal Best Record for ${difficulty.toUpperCase()}!`);
+            }
+        } catch (error) {
+            console.log('Error saving high score:', error);
+        }
+    }
+  };
+
   // Helper function to determine the max allowed strikes dynamically
   const getMaxMistakes = (level: 'easy' | 'medium' | 'hard'): number => {
     if (level === 'easy') return 10;
@@ -93,6 +140,8 @@ export default function App() {
     setTimeout(() => {
         // Check if this final move solved puzzle
         if (checkWinCondition(newBoard)) {
+            // Check and log high score instantly!
+            checkAndSaveHighScore(seconds);
             if (Platform.OS === 'web') {
                 // Web browser fallback layout
                 alert("🎉 Congratulations! You have successfully solved the Sudoku puzzle perfectly!");
@@ -198,6 +247,11 @@ export default function App() {
     <View style={styles.container}>
         <View style={styles.headerContainer}>
             <Text style={styles.timerText}>⏱️ Time: {formatTime(seconds)}</Text>
+            {bestTimes[difficulty] > 0 && (
+              <Text style={styles.bestTimeText}>
+                🏆 Best: {formatTime(bestTimes[difficulty])}
+              </Text>
+            )}
             <Text style={[
                 styles.mistakeText,
                 mistakes > 0 && mistakes >= getMaxMistakes(difficulty) - 1 ? styles.criticalMistakeText : null
@@ -506,5 +560,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 0.5,
+  },
+  bestTimeText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#b45309', // Deep trophy bronze/gold color
+    marginTop: 2,
   },
 });
