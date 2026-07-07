@@ -26,6 +26,8 @@ A modern, interactive $9 \times 9$ Sudoku puzzle game built from scratch using R
   - *Smart Hint Generation:* Created an algorithmic lookahead constraint calculation module capable of instantly solving and filling a single targeted cell when a player is stuck.
   - *Persistent High Scores:* Installed and integrated `@react-native-async-storage/async-storage` to cache, read, and display personal best times safely across app reboots and device restarts.
 - **Milestone 13 (Dynamic Infinite Board Generation):** Developed a complete randomized board synthesizer. It utilizes a Fisher-Yates shuffle algorithm to generate completely unique, valid completed boards, then carves out empty cells dynamically depending on the selected difficulty tier—eliminating the need for static matrix blueprints entirely.
+- **Milestone 14 (Frictionless Silent Cloud Authentication):** Integrated Firebase Anonymous Authentication to silently provision unique cloud identities ($uid$) on application boot. Configured a smart platform-split architecture that routes through standard browser memory hooks on Web (`localhost`) while binding native hardware persistence on iOS/Android via AsyncStorage pipelines.
+- **Milestone 15 (Real-Time Cloud Synchronization & Security Isolation):** Structured a real-time data sync channel connecting the app directly to Cloud Firestore. Configured the persistence engine to push verified high scores and multi-tier difficulty performance benchmarks automatically upon board completion. Deployed declarative database security rules enforcing document isolation paths matching incoming auth signatures (`/users/{userId}`).
 ---
 
 ## 🛠️ Tech Stack
