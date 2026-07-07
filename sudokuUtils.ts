@@ -80,3 +80,70 @@ export const solveSudokuMatrix = (board: number[][]): boolean => {
     // Every single slot has been successfully filled without conflict
     return true;
 };
+
+// Helper to shuffle an array randomly using the Fisher-Yates algorithm
+const shuffleArray = (array: number[]): number[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
+
+// Algorithmic Dynamic Board Generator Engine
+export const generateRandomSudoku = (level: 'easy' | 'medium' | 'hard'): { startingBoard: number[][], solvedBoard: number[][] } => {
+  // Initialize a completely blank 9x9 matrix
+  const matrix: number[][] = Array(9).fill(null).map(() => Array(9).fill(0));
+
+  // Randomized Backtracking Solver to fill the board completely
+  const fillBoardRandomly = (grid: number[][]): boolean => {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (grid[row][col] === 0) {
+          // Scramble numbers 1-9 to ensure structural randomness
+          const randomNumbers = shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+          for (const num of randomNumbers) {
+            if (!checkIsInvalid(row, col, num, grid)) {
+              grid[row][col] = num;
+
+              if (fillBoardRandomly(grid)) return true;
+
+              grid[row][col] = 0; // Backtrack
+            }
+          }
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  // Generate the full solution matrix
+  fillBoardRandomly(matrix);
+
+  // Keep a perfect copy of the solution to double check wins later if needed
+  const solvedBoard = matrix.map(r => [...r]);
+
+  // 3. Carve holes out of the board based on difficulty metrics
+  let cellsToRemove = 35; // Easy fallback
+  if (level === 'medium') cellsToRemove = 45;
+  if (level === 'hard') cellsToRemove = 54;
+
+  const startingBoard = matrix.map(r => [...r]);
+  let removedCount = 0;
+
+  while (removedCount < cellsToRemove) {
+    const randomRow = Math.floor(Math.random() * 9);
+    const randomCol = Math.floor(Math.random() * 9);
+
+    // Only clear it if it isn't already empty
+    if (startingBoard[randomRow][randomCol] !== 0) {
+      startingBoard[randomRow][randomCol] = 0;
+      removedCount++;
+    }
+  }
+
+  return { startingBoard, solvedBoard };
+};

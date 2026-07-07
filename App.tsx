@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform } from 'react-native';
-import { SUDOKU_POOLS } from './startingBoards';
-import { checkIsInvalid, checkWinCondition, solveSudokuMatrix } from './sudokuUtils';
+import { checkIsInvalid, checkWinCondition, solveSudokuMatrix, generateRandomSudoku } from './sudokuUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
@@ -10,8 +9,9 @@ export default function App() {
 
   // our memory slot. It will track { row: X, col: Y}
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
-  const [initialBoard, setInitialBoard] = useState(SUDOKU_POOLS.easy);
-  const [board, setBoard] = useState(SUDOKU_POOLS.easy.map(r => [...r]));
+  // Safely initialize your starting hooks with a generated easy board structure
+  const [initialBoard, setInitialBoard] = useState<number[][]>(() => generateRandomSudoku('easy').startingBoard);
+  const [board, setBoard] = useState<number[][]>(() => initialBoard.map(r => [...r]));
   const [selectedCell, setSelectedCell] = useState<{row:number, col:number} | null>(null)
 
   // Track elapsed seconds
@@ -72,10 +72,11 @@ export default function App() {
   };
 
   const loadNewDifficulty = (level: 'easy' | 'medium' | 'hard') => {
-    const selectedPool = SUDOKU_POOLS[level];
+    // Call the dynamic random puzzle engine instead of static blueprints
+    const { startingBoard } = generateRandomSudoku(level);
     setDifficulty(level);
-    setInitialBoard(selectedPool);
-    setBoard(selectedPool.map(r => [...r]));
+    setInitialBoard(startingBoard);
+    setBoard(startingBoard.map(r => [...r]));
     setSelectedCell(null);
     setSeconds(0);
     setMistakes(0);
