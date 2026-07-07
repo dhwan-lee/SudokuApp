@@ -3,16 +3,40 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Platform } from 'react-native';
 import { checkIsInvalid, checkWinCondition, solveSudokuMatrix, generateRandomSudoku } from './sudokuUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth, db } from './firebaseConfig'; // Add 'db' here
+import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; // Add these Firestore functions
 
 export default function App() {
   const grid_layout = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-
   // our memory slot. It will track { row: X, col: Y}
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   // Safely initialize your starting hooks with a generated easy board structure
   const [initialBoard, setInitialBoard] = useState<number[][]>(() => generateRandomSudoku('easy').startingBoard);
   const [board, setBoard] = useState<number[][]>(() => initialBoard.map(r => [...r]));
   const [selectedCell, setSelectedCell] = useState<{row:number, col:number} | null>(null)
+
+  // Track the secure anonymous user ID string in state
+  const [userUid, setUserUid] = useState<string | null>(null);
+
+  // Initialize the background silent authentication tunnel on boot
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        console.log("🔒 Securely authenticated anonymously. User UID:", currentUser.uid);
+        setUserUid(currentUser.uid);
+      } else {
+        signInAnonymously(auth)
+          .then((cred) => {
+            console.log("🆕 Created new anonymous player profile. UID:", cred.user.uid);
+            setUserUid(cred.user.uid);
+          })
+          .catch((err) => console.log("Firebase Auth Error:", err));
+      }
+    });
+
+    return () => unsubscribe(); // Unmount listener cleanly on app closure
+  }, []);
 
   // Track elapsed seconds
   const [seconds, setSeconds] = useState(0);
@@ -44,10 +68,11 @@ export default function App() {
   // Helper function to check and save a new high score record
   const checkAndSaveHighScore = async (finalTime: number) => {
     const currentRecord = bestTimes[difficulty];
+    let updatedRecords = { ...bestTimes };
 
     // If there's no record yet, or the new time is faster (less seconds)
     if (currentRecord === 0 || finalTime < currentRecord) {
-        const updatedRecords = {
+        updatedRecords = {
             ...bestTimes,
             [difficulty]: finalTime,
         };
@@ -55,12 +80,35 @@ export default function App() {
         setBestTimes(updatedRecords);
         try {
             await AsyncStorage.setItem('SUDOKU_BEST_TIMES', JSON.stringify(updatedRecords));
-            if (Platform.OS === 'web') {
-            alert(`🏆 New Personal Best Record for ${difficulty.toUpperCase()}!`);
-            }
+            
+            // 📍 FIX: Delay the popup alert so the board renders the final number first!
+            setTimeout(() => {
+              if (Platform.OS === 'web') {
+                alert(`🏆 New Personal Best Record for ${difficulty.toUpperCase()}!`);
+              } else {
+                Alert.alert("🏆 New Record!", `New Personal Best Record for ${difficulty.toUpperCase()}!`);
+              }
+            }, 100); // 100ms is the sweet spot for UI rendering updates
+
         } catch (error) {
-            console.log('Error saving high score:', error);
+            console.log('Error saving high score locally:', error);
         }
+    }
+
+    // FIRESTORE CLOUD SYNC (Moved outside the if-check so it runs every single win!)
+    try {
+      if (userUid) {
+        await setDoc(doc(db, "users", userUid), {
+          bestTimes: updatedRecords,
+          currentSessionTime: finalTime,
+          lastUpdated: serverTimestamp()
+        }, { merge: true });
+        console.log("☁️ Data successfully synced to Cloud Firestore!");
+      } else {
+        console.log("⚠️ Cannot sync: userUid is still loading.");
+      }
+    } catch (cloudError) {
+      console.log("❌ Firestore Write Error:", cloudError);
     }
   };
 
@@ -235,6 +283,7 @@ export default function App() {
       
       // Keep it selected so they can see what changed!
       setSelectedCell({ row: finalRow, col: finalCol });
+
     } else {
       if (Platform.OS === 'web') {
         alert("❌ Your current board has conflicts. Clear your mistakes before asking for a hint!");
@@ -243,11 +292,16 @@ export default function App() {
       }
     }
   };
+  
     
   return (
     <View style={styles.container}>
         <View style={styles.headerContainer}>
             <Text style={styles.timerText}>⏱️ Time: {formatTime(seconds)}</Text>
+            {/* ADD THIS LINE TEMPORARILY TO VISUALLY SEE YOUR ID */}
+            <Text style={{ fontSize: 10, color: '#94a3b8', marginTop: 4 }}>
+              Cloud ID: {userUid ? userUid : "Connecting to Firebase..."}
+            </Text>
             {bestTimes[difficulty] > 0 && (
               <Text style={styles.bestTimeText}>
                 🏆 Best: {formatTime(bestTimes[difficulty])}
